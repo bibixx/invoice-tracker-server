@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt-nodejs";
 import { BCRYPT_ROUNDS } from "../constants/bcrypt";
-import { IUser } from "./User.interface";
+import { IUser } from "../interfaces/User";
 
 const userSchema = new mongoose.Schema({
   email: { type: String, unique: true },

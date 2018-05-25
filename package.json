@@ -27,6 +27,7 @@
     "watch-debug": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run serve-debug\""
   },
   "dependencies": {
+    "@types/express-jwt": "^0.0.40",
     "@types/jsonwebtoken": "^7.2.7",
     "async": "^2.6.0",
     "bcrypt-nodejs": "^0.0.3",
@@ -38,6 +39,7 @@
     "errorhandler": "^1.5.0",
     "express": "^4.16.2",
     "express-flash": "0.0.2",
+    "express-jwt": "^5.3.1",
     "express-session": "^1.15.6",
     "express-validator": "5.2.0",
     "fbgraph": "^1.4.1",

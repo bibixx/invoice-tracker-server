@@ -3,11 +3,10 @@ import mongoose from "mongoose";
 import bluebird from "bluebird";
 import jwt from "jsonwebtoken";
 
-import app from "../src/app";
+import { IUserModel } from "../src/models/User";
 import User from "../src/models/User";
 
-import { IUserModel } from "../src/models/User";
-
+import app from "../src/app";
 const chai = require("chai");
 const expect = chai.expect;
 
@@ -26,9 +25,13 @@ describe("POST /register", () => {
     }
   });
 
-  beforeEach(async () => {
+  afterEach( async () => {
     await User.remove({});
-  });
+  } );
+
+  afterAll( async () => {
+    await mongoose.disconnect();
+  } );
 
   it("should return 200 OK if all parameters are ok", () => {
     return request(app)
@@ -93,14 +96,24 @@ describe("POST /login", () => {
 
     try {
       await mongoose.connect(mongoUrl, {useMongoClient: true});
-      const user = new User({
-        email,
-        password,
-      });
     } catch (err) {
       console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
     }
   });
+
+  beforeEach(async () => {
+    await request(app)
+      .post("/register")
+      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
+  });
+
+  afterEach( async () => {
+    await User.remove({});
+  } );
+
+  afterAll( async () => {
+    await mongoose.disconnect();
+  } );
 
   it("should return 200 after successful login", async () => {
     const res = await request(app)
@@ -143,6 +156,7 @@ describe("POST /login", () => {
 
         expect(() => { token = jwt.decode(res.body.token); }).not.to.throw();
         expect(token.email).to.equal(email);
+        expect(token._id).to.not.be.undefined;
       });
   });
 });

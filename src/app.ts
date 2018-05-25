@@ -2,17 +2,20 @@ import express from "express";
 import compression from "compression";  // compresses requests
 import bodyParser from "body-parser";
 import logger from "./util/logger";
+import path from "path";
+import jwt from "express-jwt";
 import lusca from "lusca";
 import dotenv from "dotenv";
-import path from "path";
 import mongoose from "mongoose";
 import bluebird from "bluebird";
-import { MONGODB_URI } from "./util/secrets";
-import { Request, Response, NextFunction } from "express";
 
+import { MONGODB_URI, JWT_SECRET } from "./util/secrets";
+import { Request, Response, NextFunction } from "express";
 
 import * as apiController from "./controllers/api";
 import * as userController from "./controllers/user";
+import * as recordsController from "./controllers/records";
+import * as sellersController from "./controllers/sellers";
 
 // Load environment variables from .env file, where API keys and passwords are configured
 dotenv.config({ path: ".env.example" });
@@ -40,11 +43,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
 
-
 app.get("/ping", apiController.getPing);
+
+app.use("/auth/*",
+  jwt({secret: JWT_SECRET}),
+);
 
 app.post("/register", ...userController.register);
 app.post("/login", ...userController.login);
+
+app.get("/auth/records", recordsController.getRecords);
+app.get("/auth/sellers", sellersController.getSellers);
 
 type errorObject = {
   status: number,

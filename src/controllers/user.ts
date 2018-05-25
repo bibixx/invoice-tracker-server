@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 
 import { sanitizeBody } from "express-validator/filter";
 import { check, validationResult } from "express-validator/check";
 
 import User, { IUserModel } from "../models/User";
-import { IUserWithoutPassword } from "../models/User.interface";
+import { IUserWithoutPassword } from "../interfaces/User";
 
-import { JWT_SECRET } from "../util/secrets";
+import { createToken } from "../util/createToken";
 
 const cEmail: any = check("email");
 const cPassword: any = check("password");
@@ -91,10 +90,11 @@ export const login = [
     }
 
     const userData: IUserWithoutPassword = {
-      email: req.body.email
+      _id: user._id,
+      email: user.email
     };
 
-    const token: string = jwt.sign(userData, JWT_SECRET);
+    const token: string = createToken(userData);
 
     return res.json({ ok: true, token });
   }
