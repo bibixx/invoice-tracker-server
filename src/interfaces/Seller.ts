@@ -1,7 +1,7 @@
-import { IUser } from "./User";
+import { IUserModel } from "../models/User";
 
 export interface ISeller {
-  owner: IUser;
+  owner: IUserModel;
   name: String;
   nip: String;
   city: String;

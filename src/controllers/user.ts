@@ -20,43 +20,45 @@ export const register = [
   [
     cEmail
       .isEmail()
-      .normalizeEmail({ gmail_remove_dots: false }),
+      .normalizeEmail({ gmail_remove_dots: false })
+      .withMessage("Email invalid"),
     cPassword
       .isLength({ min: 5 })
       .withMessage("must be at least 5 chars long"),
-      cPasswordConfirm
+    cPasswordConfirm
       .isLength({ min: 5 })
       .custom((value: string, { req }: { req: Request }) => {
         if (value !== req.body.password) {
           return Promise.reject("Passwords must match");
         }
         return Promise.resolve();
-      })
+      }),
   ],
   async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return next({errors: errors.array(), status: 422});
+      return next({ errors: errors.array(), status: 422 });
     }
 
-    const user = new User( {
+    const user = new User({
       password: req.body.password,
       email: req.body.email,
-    } );
+    });
 
     try {
       await user.save();
       res.json({ ok: true });
     } catch (e) {
       if (e.code === 11000) {
-        return next( {
+        return next({
           errors: [
             {
               msg: "This email is already in use",
-            }
-          ]
-        } );
+            },
+          ],
+          status: 422,
+        });
       }
 
       return next({ errors: [e] });
@@ -79,23 +81,23 @@ export const login = [
   async (req: Request, res: Response, next: NextFunction) => {
     const user: IUserModel = await User.findOne({ email: req.body.email });
 
-    if ( !user ) {
+    if (!user) {
       return next({ errors: [{ msg: "User doesn't exist" }], status: 422 });
     }
 
     const doPasswordsMatch = await user.comparePasswords(req.body.password);
 
-    if ( !doPasswordsMatch ) {
+    if (!doPasswordsMatch) {
       return next({ errors: [{ msg: "Wrong password" }], status: 422 });
     }
 
     const userData: IUserWithoutPassword = {
       _id: user._id,
-      email: user.email
+      email: user.email,
     };
 
     const token: string = createToken(userData);
 
-    return res.json({ ok: true, token });
-  }
+    return res.json({ token, ok: true });
+  },
 ];

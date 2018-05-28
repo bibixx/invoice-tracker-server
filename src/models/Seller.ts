@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
-
 import { ISeller } from "../interfaces/Seller";
+
+export interface ISellerModel extends ISeller, mongoose.Document {}
 
 const sellerSchema = new mongoose.Schema({
   owner: {
@@ -15,6 +16,7 @@ const sellerSchema = new mongoose.Schema({
   nip: {
     type: String,
     required: true,
+    unique: true,
   },
   city: {
     type: String,
@@ -35,8 +37,8 @@ const sellerSchema = new mongoose.Schema({
   place: {
     type: Boolean,
     required: true,
-  }
+  },
 });
 
-const Seller = mongoose.model("Seller", sellerSchema);
+const Seller = mongoose.model<ISellerModel>("Seller", sellerSchema);
 export default Seller;

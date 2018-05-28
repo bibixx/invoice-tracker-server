@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import compression from "compression";  // compresses requests
 import bodyParser from "body-parser";
 import logger from "./util/logger";
@@ -10,7 +10,6 @@ import mongoose from "mongoose";
 import bluebird from "bluebird";
 
 import { MONGODB_URI, JWT_SECRET } from "./util/secrets";
-import { Request, Response, NextFunction } from "express";
 
 import * as apiController from "./controllers/api";
 import * as userController from "./controllers/user";
@@ -27,9 +26,12 @@ const app = express();
 
 (<any>mongoose).Promise = bluebird;
 
-mongoose.connect(MONGODB_URI, {useMongoClient: true}).then(
+const MONGODB_URI_TEST = "mongodb://localhost:27017/invoice-test";
+
+// mongoose.connect(MONGODB_URI, { useMongoClient: true }).then(
+mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true }).then(
   () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
-).catch(err => {
+).catch((err) => {
   console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
 });
 
@@ -45,19 +47,19 @@ app.use(lusca.xssProtection(true));
 
 app.get("/ping", apiController.getPing);
 
-app.use("/auth/*",
-  jwt({secret: JWT_SECRET}),
-);
+app.use("/auth/*", jwt({ secret: JWT_SECRET }));
 
 app.post("/register", ...userController.register);
 app.post("/login", ...userController.login);
 
 app.get("/auth/records", recordsController.getRecords);
+
 app.get("/auth/sellers", sellersController.getSellers);
+app.post("/auth/sellers", sellersController.postSellers);
 
 type errorObject = {
   status: number,
-  errors: Array<object>
+  errors: object[],
 };
 
 app.use((err: errorObject, req: Request, res: Response, next: NextFunction) => {
@@ -65,7 +67,7 @@ app.use((err: errorObject, req: Request, res: Response, next: NextFunction) => {
     .status(err.status || 500)
     .json({
       ok: false,
-      errors: err.errors
+      errors: err.errors,
     });
 });
 

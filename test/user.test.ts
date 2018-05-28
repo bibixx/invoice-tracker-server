@@ -1,162 +1,145 @@
+import chai, { expect, assert } from "chai";
 import request from "supertest";
 import mongoose from "mongoose";
 import bluebird from "bluebird";
 import jwt from "jsonwebtoken";
 
-import { IUserModel } from "../src/models/User";
-import User from "../src/models/User";
-
+import User, { IUserModel } from "../src/models/User";
 import app from "../src/app";
-const chai = require("chai");
-const expect = chai.expect;
 
 const email = "a@a.pl";
 const password = "passw0rd";
 
+const MONGODB_URI_TEST = "mongodb://localhost:27017/invoice-test";
+
 describe("POST /register", () => {
   beforeAll(async () => {
-    const mongoUrl = "mongodb://localhost:27017/invoice-test";
     (<any>mongoose).Promise = bluebird;
 
     try {
-      await mongoose.connect(mongoUrl, {useMongoClient: true});
-    } catch (err) {
-      console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
-    }
-  });
-
-  afterEach( async () => {
-    await User.remove({});
-  } );
-
-  afterAll( async () => {
-    await mongoose.disconnect();
-  } );
-
-  it("should return 200 OK if all parameters are ok", () => {
-    return request(app)
-      .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`)
-      .expect(200)
-      .then((res) => {
-        expect(res.body.ok).to.equal(true);
-      });
-  });
-
-  it("should return error if email is invalid", () => {
-    return request(app)
-      .post("/register")
-      .send(`email=a@a&password=${password}&confirmPassword=${password}`)
-      .expect(422)
-      .then((res) => {
-        expect(res.body.ok).to.equal(false);
-        expect(res.body.errors[0].msg).to.equal("Invalid value");
-      });
-  });
-
-  it("should return error if passwords don't match", () => {
-    return request(app)
-      .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=passw0r`)
-      .expect(422)
-      .then((res) => {
-        expect(res.body.ok).to.equal(false);
-        expect(res.body.errors[0].msg).to.equal("Passwords must match");
-      });
-  });
-
-  it("should return 500 if user with specified email was already registered", async () => {
-    await request(app)
-      .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
-
-    return request(app)
-      .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`)
-      .expect(500);
-  });
-
-  it("should create valid user", async () => {
-    await request(app)
-      .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
-
-    const user: IUserModel = await User.findOne({});
-
-    expect(user.email).to.equal(email);
-    expect(await user.comparePasswords(password)).to.equal(true);
-  });
-
-});
-
-describe("POST /login", () => {
-  beforeAll(async () => {
-    const mongoUrl = "mongodb://localhost:27017/invoice-test";
-    (<any>mongoose).Promise = bluebird;
-
-    try {
-      await mongoose.connect(mongoUrl, {useMongoClient: true});
+      await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true }).then(() => {});
     } catch (err) {
       console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
     }
   });
 
   beforeEach(async () => {
-    await request(app)
-      .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
+    await User.remove({});
   });
 
-  afterEach( async () => {
+  afterAll(async () => {
     await User.remove({});
-  } );
-
-  afterAll( async () => {
     await mongoose.disconnect();
-  } );
+  });
+
+  it("should return 200 OK if all parameters are ok", async () => {
+    const res = await request(app)
+      .post("/register")
+      .send(`email=${email}&password=${password}&confirmPassword=${password}`)
+      .expect(200);
+
+    expect(res.body.ok).to.equal(true);
+  });
+
+  it("should return error if email is invalid", async () => {
+    const res = await request(app)
+      .post("/register")
+      .send(`email=a@a&password=${password}&confirmPassword=${password}`)
+      .expect(422);
+
+    expect(res.body.errors[0].msg).to.equal("Email invalid");
+  });
+
+  it("should return error if passwords don't match", async () => {
+    const res = await request(app)
+      .post("/register")
+      .send(`email=${email}&password=${password}&confirmPassword=${password}-invalid`)
+      .expect(422);
+
+    expect(res.body.errors[0].msg).to.equal("Passwords must match");
+  });
+
+  it("should return 422 if user with specified email was already registered", async () => {
+    const user = new User({ email, password });
+    await user.save();
+
+    const res = await request(app)
+      .post("/register")
+      .send(`email=${email}&password=${password}&confirmPassword=${password}`)
+      .expect(422);
+
+    expect(res.body.errors[0].msg).to.equal("This email is already in use");
+  });
+
+  it("should create valid user", async () => {
+    await request(app)
+      .post("/register")
+      .send(`email=${email}&password=${password}&confirmPassword=${password}`)
+      .expect(200);
+
+    const user: IUserModel = await User.findOne({});
+
+    expect(user.email).to.equal(email);
+    expect(await user.comparePasswords(password)).to.equal(true);
+  });
+});
+
+describe("POST /login", () => {
+  beforeAll(async () => {
+    (<any>mongoose).Promise = bluebird;
+
+    try {
+      await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true }).then(() => {});
+
+      const user = new User({ email, password });
+      await user.save();
+    } catch (err) {
+      console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
+    }
+  });
+
+  beforeEach(async () => {
+  });
+
+  afterAll(async () => {
+    await User.remove({});
+    await mongoose.disconnect();
+  });
 
   it("should return 200 after successful login", async () => {
     const res = await request(app)
       .post("/login")
       .send(`email=${email}&password=${password}`)
-      .expect(200)
-      .then((res) => {
-        expect(res.body.ok).to.equal(true);
-      });
-  } );
+      .expect(200);
+  });
 
   it("should return error if user doesn't exist", async () => {
-    await request(app)
+    const res = await request(app)
       .post("/login")
-      .send(`email=other@mail.com&password=${password}`)
-      .expect(422)
-      .then((res) => {
-        expect(res.body.ok).to.equal(false);
-        expect(res.body.errors[0].msg).to.equal("User doesn't exist");
-      });
-  } );
+      .send(`email=a@b.pl&password=${password}`)
+      .expect(422);
+
+    expect(res.body.errors[0].msg).to.equal("User doesn't exist");
+  });
 
   it("should return error if password is invalid", async () => {
-    await request(app)
+    const res = await request(app)
       .post("/login")
       .send(`email=${email}&password=${password}-invalid`)
-      .expect(422)
-      .then((res) => {
-        expect(res.body.errors[0].msg).to.equal("Wrong password");
-      });
-  } );
+      .expect(422);
+
+    expect(res.body.errors[0].msg).to.equal("Wrong password");
+  });
 
   it("should return jwt of user", async () => {
-    await request(app)
+    const res = await request(app)
       .post("/login")
       .send(`email=${email}&password=${password}`)
-      .expect(200)
-      .then((res) => {
-        let token;
+      .expect(200);
 
-        expect(() => { token = jwt.decode(res.body.token); }).not.to.throw();
-        expect(token.email).to.equal(email);
-        expect(token._id).to.not.be.undefined;
-      });
+    let token;
+    expect(() => { token = jwt.decode(res.body.token); }).not.to.throw();
+    expect(token.email).to.equal(email);
+    expect(token._id).to.not.be.undefined;
   });
 });

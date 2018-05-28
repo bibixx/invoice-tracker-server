@@ -1,7 +1,5 @@
-import mongoose from "mongoose";
-
 export interface IUserWithoutPassword {
-  _id: String;
+  _id: any;
   email: String;
 }
 

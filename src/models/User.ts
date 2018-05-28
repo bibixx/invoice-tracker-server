@@ -3,22 +3,22 @@ import bcrypt from "bcrypt-nodejs";
 import { BCRYPT_ROUNDS } from "../constants/bcrypt";
 import { IUser } from "../interfaces/User";
 
+export interface IUserModel extends IUser, mongoose.Document {
+  comparePasswords: comparePasswordsFunction;
+}
+
 const userSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   password: String,
 });
 
-export interface IUserModel extends IUser, mongoose.Document {
-  comparePasswords: comparePasswordsFunction;
-}
-
 export type comparePasswordsFunction = (passwordToCheck: string) => Promise<{}>;
 
-const comparePasswords: comparePasswordsFunction = async function(passwordToCheck) {
+const comparePasswords: comparePasswordsFunction = async function (passwordToCheck) {
   const user = this;
 
   return new Promise((resolve, reject) => {
-    bcrypt.compare(passwordToCheck, user.password, function(err, res) {
+    bcrypt.compare(passwordToCheck, user.password, (err, res) => {
       if (err) {
         return reject(err);
       }
@@ -30,7 +30,7 @@ const comparePasswords: comparePasswordsFunction = async function(passwordToChec
 
 userSchema.methods.comparePasswords = comparePasswords;
 
-userSchema.pre("save", async function save(next) {
+userSchema.pre("save", async function save(next: Function) {
   const user = this;
 
   if (!user.isModified("password")) { return next(); }
@@ -44,5 +44,5 @@ userSchema.pre("save", async function save(next) {
   });
 });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model<IUserModel>("User", userSchema);
 export default User;

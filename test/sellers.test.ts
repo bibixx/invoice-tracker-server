@@ -1,14 +1,11 @@
 import request from "supertest";
 import app from "../src/app";
 
-import { IUser } from "../src/interfaces/User";
-import { ISeller } from "../src/interfaces/Seller";
-
-import Seller from "../src/models/Seller";
-import User from "../src/models/User";
+import User, { IUserModel } from "../src/models/User";
+import Seller, { ISellerModel } from "../src/models/Seller";
+import { IUserWithoutPassword } from "../src/interfaces/User";
 
 import { createToken } from "../src/util/createToken";
-
 
 import mongoose, { mongo } from "mongoose";
 import bluebird from "bluebird";
@@ -16,93 +13,130 @@ import bluebird from "bluebird";
 const chai = require("chai");
 const expect = chai.expect;
 
-// const token: string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFAYS5wbCJ9.ZMq6oOXCFuPcA6Duf7ILa4Aj8qSNIkDH92ixGMi72Ac";
+const MONGODB_URI_TEST = "mongodb://localhost:27017/invoice-test";
+
 let token: string;
 
-let sellerMock: ISeller[];
+let sellerMock: ISellerModel[];
 
 describe("GET /auth/sellers", () => {
-  beforeAll( async () => {
-    const mongoUrl = "mongodb://localhost:27017/invoice-test";
+  beforeAll(async () => {
     (<any>mongoose).Promise = bluebird;
 
     try {
-      await mongoose.connect(mongoUrl, {useMongoClient: true});
+      await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true }).then(() => {});
+      const user: IUserModel = new User({ email: "a@a.pl", password: "passw0rd" });
+      const user2: IUserModel = new User({ email: "b@a.pl", password: "passw0rd" });
+
+      await Promise.all([user.save(), user2.save()]);
+
+      const userData: IUserWithoutPassword = {
+        _id: user._id,
+        email: user.email,
+      };
+
+      token = createToken(userData);
     } catch (err) {
       console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
     }
   });
 
-  beforeEach( async () => {
-    const user1: IUser = new User({ email: "a@a.pl", password: "passw0rd" });
-    const user2: IUser = new User({ email: "b@a.pl", password: "passw0rd" });
-    user1.save();
-    user2.save();
+  beforeEach(async () => {
+    await Seller.remove({});
 
-    console.log({
-      _id: user1._id,
-      email: user1.email
-    });
-
-
-    token = createToken({
-      _id: user1._id,
-      email: user1.email
-    });
-
+    const users = await User.find({});
 
     sellerMock = [
-      {
-        owner: user1,
+      new Seller({
+        owner: users[0],
         name: "A",
         nip: "000000",
         city: "Warszawa",
-        street: "Pisarka 2",
+        street: "Pisarka",
         zip: "03-984",
         seller: true,
         place: true,
-      },
-      {
-        owner: user2,
+      }),
+      new Seller({
+        owner: users[1],
         name: "A",
-        nip: "000000",
+        nip: "000001",
         city: "Warszawa",
-        street: "Pisarka 2",
+        street: "Pisarka",
         zip: "03-984",
         seller: true,
         place: true,
-      },
+      }),
     ];
 
-    const sellers = sellerMock.map( m => new Seller(m) );
-    const sellerPromises = sellers.map(s => s.save());
-
-    await Promise.all(sellerPromises);
-  } );
-
-  afterEach(async () => {
-    await User.remove({});
-    await Seller.remove({});
+    await Promise.all(sellerMock.map(s => s.save()));
   });
 
   afterAll(async () => {
+    await Seller.remove({});
+    await User.remove({});
     await mongoose.disconnect();
   });
 
   it("should return 200", async () => {
-    await request(app)
-      .get("/auth/sellers")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
-  });
-
-  it("should return all sellers for current user", async () => {
-    await request(app)
+    return request(app)
       .get("/auth/sellers")
       .set("Authorization", `Bearer ${token}`)
       .expect(200)
       .then((res) => {
-        expect(res.body.sellers).to.have.lengthOf(sellerMock.filter( s => s.owner.email === "a@a.pl").length);
+        expect(res.body.ok).to.equal(true);
+      });
+  });
+
+  it("should return all sellers for current user", async () => {
+    return request(app)
+      .get("/auth/sellers")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .then((res) => {
+        expect(res.body.sellers).to.have.lengthOf(1);
+      });
+  });
+});
+
+describe("POST /auth/sellers", () => {
+  beforeAll(async () => {
+    (<any>mongoose).Promise = bluebird;
+
+    try {
+      await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true }).then(() => {});
+      const user: IUserModel = new User({ email: "a@a.pl", password: "passw0rd" });
+
+      await user.save();
+
+      const userData: IUserWithoutPassword = {
+        _id: user._id,
+        email: user.email,
+      };
+
+      token = createToken(userData);
+    } catch (err) {
+      console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
+    }
+  });
+
+  beforeEach(async () => {
+    Seller.remove({});
+  });
+
+  afterAll(async () => {
+    await Seller.remove({});
+    await User.remove({});
+    await mongoose.disconnect();
+  });
+
+  it("should return 200", async () => {
+    return request(app)
+      .get("/auth/sellers")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .then((res) => {
+        expect(res.body.ok).to.equal(true);
       });
   });
 });
