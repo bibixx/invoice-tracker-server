@@ -21,34 +21,31 @@ let sellerMock: ISellerModel[];
 
 describe("GET /auth/sellers", () => {
   beforeAll(async () => {
-    (<any>mongoose).Promise = bluebird;
+    (<any>mongoose).Promise = global.Promise;
 
     try {
-      await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true }).then(() => {});
-      const user: IUserModel = new User({ email: "a@a.pl", password: "passw0rd" });
-      const user2: IUserModel = new User({ email: "b@a.pl", password: "passw0rd" });
-
-      await Promise.all([user.save(), user2.save()]);
-
-      const userData: IUserWithoutPassword = {
-        _id: user._id,
-        email: user.email,
-      };
-
-      token = createToken(userData);
+      await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true });
     } catch (err) {
       console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
     }
   });
 
   beforeEach(async () => {
-    await Seller.remove({});
+    await mongoose.connection.db.dropDatabase();
 
-    const users = await User.find({});
+    const user: IUserModel = new User({ email: "a@a.pl", password: "passw0rd" });
+    const user2: IUserModel = new User({ email: "b@a.pl", password: "passw0rd" });
+
+    const userData: IUserWithoutPassword = {
+      _id: user._id,
+      email: user.email,
+    };
+
+    token = createToken(userData);
 
     sellerMock = [
       new Seller({
-        owner: users[0],
+        owner: user,
         name: "A",
         nip: "000000",
         city: "Warszawa",
@@ -58,7 +55,7 @@ describe("GET /auth/sellers", () => {
         place: true,
       }),
       new Seller({
-        owner: users[1],
+        owner: user2,
         name: "A",
         nip: "000001",
         city: "Warszawa",
@@ -69,13 +66,12 @@ describe("GET /auth/sellers", () => {
       }),
     ];
 
+    await Promise.all([user.save(), user2.save()]);
     await Promise.all(sellerMock.map(s => s.save()));
   });
 
   afterAll(async () => {
-    await Seller.remove({});
-    await User.remove({});
-    await mongoose.disconnect();
+    return mongoose.disconnect();
   });
 
   it("should return 200", async () => {
@@ -101,33 +97,32 @@ describe("GET /auth/sellers", () => {
 
 describe("POST /auth/sellers", () => {
   beforeAll(async () => {
-    (<any>mongoose).Promise = bluebird;
+    (<any>mongoose).Promise = global.Promise;
 
     try {
-      await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true }).then(() => {});
-      const user: IUserModel = new User({ email: "a@a.pl", password: "passw0rd" });
-
-      await user.save();
-
-      const userData: IUserWithoutPassword = {
-        _id: user._id,
-        email: user.email,
-      };
-
-      token = createToken(userData);
+      await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true });
     } catch (err) {
       console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
     }
   });
 
   beforeEach(async () => {
-    Seller.remove({});
+    await mongoose.connection.db.dropDatabase();
+
+    const user: IUserModel = new User({ email: "a@a.pl", password: "passw0rd" });
+
+    await user.save();
+
+    const userData: IUserWithoutPassword = {
+      _id: user._id,
+      email: user.email,
+    };
+
+    token = createToken(userData);
   });
 
   afterAll(async () => {
-    await Seller.remove({});
-    await User.remove({});
-    await mongoose.disconnect();
+    return mongoose.disconnect();
   });
 
   it("should return 200", async () => {

@@ -7,7 +7,7 @@ import jwt from "express-jwt";
 import lusca from "lusca";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import bluebird from "bluebird";
+// import bluebird from "bluebird";
 
 import { MONGODB_URI, JWT_SECRET } from "./util/secrets";
 
@@ -24,7 +24,7 @@ const app = express();
 
 // Connect to MongoDB
 
-(<any>mongoose).Promise = bluebird;
+(<any>mongoose).Promise = global.Promise;
 
 const MONGODB_URI_TEST = "mongodb://localhost:27017/invoice-test";
 
@@ -55,7 +55,7 @@ app.post("/login", ...userController.login);
 app.get("/auth/records", recordsController.getRecords);
 
 app.get("/auth/sellers", sellersController.getSellers);
-app.post("/auth/sellers", sellersController.postSellers);
+app.post("/auth/sellers", ...sellersController.postSellers);
 
 type errorObject = {
   status: number,
