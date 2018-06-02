@@ -9,6 +9,7 @@ import { createToken } from "../src/util/createToken";
 
 import mongoose, { mongo } from "mongoose";
 import bluebird from "bluebird";
+import { createEmail } from "./utils/createEmail";
 
 const chai = require("chai");
 const expect = chai.expect;
@@ -19,22 +20,31 @@ let token: string;
 
 let sellerMock: ISellerModel[];
 
+const sellerEmail1 = createEmail();
+const sellerEmail2 = createEmail();
+const password = "passw0rd";
+
+beforeAll(async () => {
+  (<any>mongoose).Promise = global.Promise;
+
+  try {
+    await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true });
+    await mongoose.connection.db.dropDatabase();
+    await mongoose.connection.db.createIndex("users", { email: 1 }, { unique: true });
+  } catch (err) {
+    console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
+  }
+});
+
+afterAll(async () => {
+  await mongoose.connection.db.dropDatabase();
+  return mongoose.disconnect();
+});
+
 describe("GET /auth/sellers", () => {
   beforeAll(async () => {
-    (<any>mongoose).Promise = global.Promise;
-
-    try {
-      await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true });
-    } catch (err) {
-      console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
-    }
-  });
-
-  beforeEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-
-    const user: IUserModel = new User({ email: "a@a.pl", password: "passw0rd" });
-    const user2: IUserModel = new User({ email: "b@a.pl", password: "passw0rd" });
+    const user: IUserModel = new User({ password, email: sellerEmail1 });
+    const user2: IUserModel = new User({ password, email: sellerEmail2 });
 
     const userData: IUserWithoutPassword = {
       _id: user._id,
@@ -70,10 +80,6 @@ describe("GET /auth/sellers", () => {
     await Promise.all(sellerMock.map(s => s.save()));
   });
 
-  afterAll(async () => {
-    return mongoose.disconnect();
-  });
-
   it("should return 200", async () => {
     return request(app)
       .get("/auth/sellers")
@@ -97,19 +103,7 @@ describe("GET /auth/sellers", () => {
 
 describe("POST /auth/sellers", () => {
   beforeAll(async () => {
-    (<any>mongoose).Promise = global.Promise;
-
-    try {
-      await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true });
-    } catch (err) {
-      console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
-    }
-  });
-
-  beforeEach(async () => {
-    await mongoose.connection.db.dropDatabase();
-
-    const user: IUserModel = new User({ email: "a@a.pl", password: "passw0rd" });
+    const user: IUserModel = new User({ email: createEmail(), password: "passw0rd" });
 
     await user.save();
 
