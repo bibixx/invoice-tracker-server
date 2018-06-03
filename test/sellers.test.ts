@@ -10,12 +10,11 @@ import Seller, { ISellerModel } from "../src/models/Seller";
 import { IUserWithoutPassword } from "../src/interfaces/User";
 
 import { createToken } from "../src/util/createToken";
+import { MONGODB_URI } from "../src/util/secrets";
 
 import mongoose, { mongo } from "mongoose";
 import bluebird from "bluebird";
 import { createEmail } from "./utils/createEmail";
-
-const MONGODB_URI_TEST = "mongodb://localhost:27017/invoice-test";
 
 let token: string;
 
@@ -29,7 +28,7 @@ beforeAll(async () => {
   (<any>mongoose).Promise = global.Promise;
 
   try {
-    await mongoose.connect(MONGODB_URI_TEST);
+    await mongoose.connect(MONGODB_URI);
     await mongoose.connection.db.dropDatabase();
 
     await mongoose.connection.db.createIndex("users", { email: 1 }, { unique: true });

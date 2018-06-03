@@ -10,10 +10,16 @@ if (fs.existsSync(".env")) {
   dotenv.config({ path: ".env.example" });
 }
 export const ENVIRONMENT = process.env.NODE_ENV;
-const prod = ENVIRONMENT === "production"; // Anything else is treated as 'dev'
+const prod = ENVIRONMENT === "production";
+const test = ENVIRONMENT === "test";
 
 export const JWT_SECRET = process.env["JWT_SECRET"];
-export const MONGODB_URI = prod ? process.env["MONGODB_URI"] : process.env["MONGODB_URI_LOCAL"];
+
+export const MONGODB_URI = prod ?
+  process.env["MONGODB_URI"] :
+  test ?
+    process.env["MONGODB_URI_TEST"] :
+    process.env["MONGODB_URI_LOCAL"];
 
 if (!JWT_SECRET) {
   logger.error("No client secret. Set JWT_SECRET environment variable.");

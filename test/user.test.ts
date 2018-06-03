@@ -5,13 +5,12 @@ const { request } = chai;
 
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
+import { MONGODB_URI } from "../src/util/secrets";
 
 import { createEmail } from "./utils/createEmail";
 
 import User, { IUserModel } from "../src/models/User";
 import app from "../src/app";
-
-const MONGODB_URI_TEST = "mongodb://localhost:27017/invoice-test";
 
 const loginEmail = createEmail();
 const password = "passw0rd";
@@ -20,7 +19,7 @@ beforeAll(async () => {
   (<any>mongoose).Promise = global.Promise;
 
   try {
-    await mongoose.connect(MONGODB_URI_TEST);
+    await mongoose.connect(MONGODB_URI);
     await mongoose.connection.db.dropDatabase();
     await mongoose.connection.db.createIndex("users", { email: 1 }, { unique: true });
   } catch (err) {
