@@ -16,7 +16,6 @@ const sellerSchema = new mongoose.Schema({
   nip: {
     type: String,
     required: true,
-    unique: true,
   },
   city: {
     type: String,

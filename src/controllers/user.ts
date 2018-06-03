@@ -1,42 +1,79 @@
 import { Request, Response, NextFunction } from "express";
 import passport from "passport";
+import { validationResult, checkSchema } from "express-validator/check";
 
-import { sanitizeBody } from "express-validator/filter";
-import { check, validationResult } from "express-validator/check";
+import User from "../models/User";
 
-import User, { IUserModel } from "../models/User";
+const registerSchema = {
+  email: {
+    isEmail: true,
+    errorMessage: "Email invalid",
+    normalizeEmail: {
+      options: {
+        gmail_remove_dots: false,
+      },
+    },
+  },
+  password: {
+    isLength: {
+      errorMessage: "Password should be at least 7 chars long",
+      options: { min: 7 },
+    },
+  },
+  confirmPassword: {
+    custom: {
+      options: (value: string, { req }: { req: Request }) => {
+        if (value !== req.body.password) {
+          return Promise.reject("Passwords must match");
+        }
+        return Promise.resolve();
+      },
+    },
+  },
+};
 
-const cEmail: any = check("email");
-const cPassword: any = check("password");
-const cPasswordConfirm: any = check("confirmPassword");
+const loginSchema = {
+  email: {
+    isEmail: true,
+    errorMessage: "Email invalid",
+    normalizeEmail: {
+      options: {
+        gmail_remove_dots: false,
+      },
+    },
+  },
+  password: {
+    isLength: {
+      errorMessage: "Password should be at least 7 chars long",
+      options: { min: 7 },
+    },
+  },
+};
 
 /**
  * POST /register
  * Register using email and password.
  */
 export const register = [
-  [
-    cEmail
-      .isEmail()
-      .normalizeEmail({ gmail_remove_dots: false })
-      .withMessage("Email invalid"),
-    cPassword
-      .isLength({ min: 5 })
-      .withMessage("must be at least 5 chars long"),
-    cPasswordConfirm
-      .isLength({ min: 5 })
-      .custom((value: string, { req }: { req: Request }) => {
-        if (value !== req.body.password) {
-          return Promise.reject("Passwords must match");
-        }
-        return Promise.resolve();
-      }),
-  ],
+  checkSchema(registerSchema as any),
   async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       return next({ errors: errors.array(), status: 422 });
+    }
+
+    const userWithEmail = await User.findOne({ "local.email": req.body.email });
+
+    if (userWithEmail !== null) {
+      return next({
+        errors: [
+          {
+            msg: "This email is already in use",
+          },
+        ],
+        status: 422,
+      });
     }
 
     const user = new User({
@@ -50,17 +87,6 @@ export const register = [
       await user.save();
       res.json({ ok: true });
     } catch (e) {
-      if (e.code === 11000) {
-        return next({
-          errors: [
-            {
-              msg: "This email is already in use",
-            },
-          ],
-          status: 422,
-        });
-      }
-
       return next({ errors: [e] });
     }
   },
@@ -71,13 +97,7 @@ export const register = [
  * Sign in using email and password.
  */
 export const login = [
-  [
-    cEmail
-      .isEmail(),
-    cPassword
-      .isLength({ min: 5 })
-      .withMessage("must be at least 5 chars long"),
-  ],
+  checkSchema(loginSchema as any),
   async (req: Request, res: Response, next: NextFunction) => {
     passport.authenticate("local", { session: false }, (err, user, info) => {
       if (err || !user) {

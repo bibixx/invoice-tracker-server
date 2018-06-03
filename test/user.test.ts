@@ -21,7 +21,6 @@ beforeAll(async () => {
   try {
     await mongoose.connect(MONGODB_URI);
     await mongoose.connection.db.dropDatabase();
-    await mongoose.connection.db.createIndex("users", { "local.email": 1 }, { unique: true });
   } catch (err) {
     console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
   }
@@ -36,7 +35,7 @@ describe("POST /auth/register", () => {
     const email = createEmail("@a");
 
     const res = await request(app)
-    .post("/auth/register")
+      .post("/auth/register")
       .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
     expect(res).to.have.status(422);

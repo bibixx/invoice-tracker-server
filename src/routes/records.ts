@@ -1,5 +1,4 @@
 import { Router } from "express";
-import passport from "passport";
 import authenticate from "../auth/authentication";
 import * as recordsController from "../controllers/records";
 

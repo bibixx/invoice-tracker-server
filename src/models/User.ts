@@ -12,7 +12,7 @@ export interface IUserModel extends IUser, Document {
 
 const userSchema: Schema = new Schema({
   local: {
-    email: { type: String, unique: true },
+    email: String,
     password: String,
   },
 });
