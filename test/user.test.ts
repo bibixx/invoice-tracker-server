@@ -1,8 +1,10 @@
 import chai, { expect, assert } from "chai";
-import request from "supertest";
+import chaiHttp from "chai-http";
+chai.use(chaiHttp);
+const { request } = chai;
+
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-import fs from "fs";
 
 import { createEmail } from "./utils/createEmail";
 
@@ -18,7 +20,7 @@ beforeAll(async () => {
   (<any>mongoose).Promise = global.Promise;
 
   try {
-    await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true });
+    await mongoose.connect(MONGODB_URI_TEST);
     await mongoose.connection.db.dropDatabase();
     await mongoose.connection.db.createIndex("users", { email: 1 }, { unique: true });
   } catch (err) {
@@ -27,7 +29,6 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await mongoose.connection.db.dropDatabase();
   return mongoose.disconnect();
 });
 
@@ -37,9 +38,9 @@ describe("POST /register", () => {
 
     const res = await request(app)
     .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`)
-      .expect(422);
+      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
+    expect(res).to.have.status(422);
     expect(res.body.errors[0].msg).to.equal("Email invalid");
   });
 
@@ -48,9 +49,9 @@ describe("POST /register", () => {
 
     const res = await request(app)
     .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}-invalid`)
-      .expect(422);
+      .send(`email=${email}&password=${password}&confirmPassword=${password}-invalid`);
 
+    expect(res).to.have.status(422);
     expect(res.body.errors[0].msg).to.equal("Passwords must match");
   });
 
@@ -60,13 +61,11 @@ describe("POST /register", () => {
     const u = new User({ email, password });
     await u.save();
 
-    await new Promise(res => setTimeout(res, 200));
-
     const res = await request(app)
-    .post("/register")
-    .send(`email=${email}&password=${password}&confirmPassword=${password}`);
+      .post("/register")
+      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
-    fs.writeFileSync("./test/test.txt", await User.find({}) + "\n" + email + "\n" + u._id);
+    expect(res).to.have.status(422);
     expect(res.body.errors[0].msg).to.equal("This email is already in use");
   });
 
@@ -75,31 +74,32 @@ describe("POST /register", () => {
 
     const res = await request(app)
       .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`)
-      .expect(422);
+      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
+    expect(res).to.have.status(422);
     expect(res.body.errors[0].msg).to.equal("Passwords must match");
   });
 
   it("should return 200", async () => {
     const email = createEmail();
 
-    await request(app)
+    const res = await request(app)
       .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`)
-      .expect(200);
+      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
+
+    expect(res).to.have.status(200);
   });
 
   it("should create valid user", async () => {
     const email = createEmail();
 
-    await request(app)
+    const res = await request(app)
       .post("/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`)
-      .expect(200);
+      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
     const user: IUserModel = await User.findOne({ email });
 
+    expect(res).to.have.status(200);
     expect(user.email).to.equal(email);
     expect(await user.comparePasswords(password)).to.equal(true);
   });
@@ -118,8 +118,9 @@ describe("POST /login", () => {
 
     const res = await request(app)
     .post("/login")
-      .send(`email=${email}&password=${password}`)
-      .expect(200);
+      .send(`email=${email}&password=${password}`);
+
+    expect(res).to.have.status(200);
   });
 
   it("should return error if user doesn't exist", async () => {
@@ -127,9 +128,9 @@ describe("POST /login", () => {
 
     const res = await request(app)
       .post("/login")
-      .send(`email=${email}&password=${password}`)
-      .expect(422);
+      .send(`email=${email}&password=${password}`);
 
+    expect(res).to.have.status(422);
     expect(res.body.errors[0].msg).to.equal("User doesn't exist");
   });
 
@@ -138,9 +139,9 @@ describe("POST /login", () => {
 
     const res = await request(app)
       .post("/login")
-      .send(`email=${email}&password=${password}-invalid`)
-      .expect(422);
+      .send(`email=${email}&password=${password}-invalid`);
 
+    expect(res).to.have.status(422);
     expect(res.body.errors[0].msg).to.equal("Wrong password");
   });
 
@@ -149,10 +150,10 @@ describe("POST /login", () => {
 
     const res = await request(app)
       .post("/login")
-      .send(`email=${email}&password=${password}`)
-      .expect(200);
+      .send(`email=${email}&password=${password}`);
 
     let token;
+    expect(res).to.have.status(200);
     expect(() => { token = jwt.decode(res.body.token); }).not.to.throw();
     expect(token.email).to.equal(email);
     expect(token._id).to.not.be.undefined;

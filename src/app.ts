@@ -28,8 +28,8 @@ const app = express();
 
 const MONGODB_URI_TEST = "mongodb://localhost:27017/invoice-test";
 
-// mongoose.connect(MONGODB_URI, { useMongoClient: true }).then(
-mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true }).then(
+// mongoose.connect(MONGODB_URI).then(
+mongoose.connect(MONGODB_URI_TEST).then(
   () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
 ).catch((err) => {
   console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);

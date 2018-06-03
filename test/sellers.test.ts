@@ -1,4 +1,8 @@
-import request from "supertest";
+import chai, { expect, assert } from "chai";
+import chaiHttp from "chai-http";
+chai.use(chaiHttp);
+const { request } = chai;
+
 import app from "../src/app";
 
 import User, { IUserModel } from "../src/models/User";
@@ -10,9 +14,6 @@ import { createToken } from "../src/util/createToken";
 import mongoose, { mongo } from "mongoose";
 import bluebird from "bluebird";
 import { createEmail } from "./utils/createEmail";
-
-const chai = require("chai");
-const expect = chai.expect;
 
 const MONGODB_URI_TEST = "mongodb://localhost:27017/invoice-test";
 
@@ -28,8 +29,9 @@ beforeAll(async () => {
   (<any>mongoose).Promise = global.Promise;
 
   try {
-    await mongoose.connect(MONGODB_URI_TEST, { useMongoClient: true });
+    await mongoose.connect(MONGODB_URI_TEST);
     await mongoose.connection.db.dropDatabase();
+
     await mongoose.connection.db.createIndex("users", { email: 1 }, { unique: true });
   } catch (err) {
     console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
@@ -37,7 +39,6 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await mongoose.connection.db.dropDatabase();
   return mongoose.disconnect();
 });
 
@@ -81,23 +82,21 @@ describe("GET /auth/sellers", () => {
   });
 
   it("should return 200", async () => {
-    return request(app)
+    const res = await request(app)
       .get("/auth/sellers")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200)
-      .then((res) => {
-        expect(res.body.ok).to.equal(true);
-      });
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res).to.have.status(200);
+    expect(res.body.ok).to.equal(true);
   });
 
   it("should return all sellers for current user", async () => {
-    return request(app)
+    const res = await request(app)
       .get("/auth/sellers")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200)
-      .then((res) => {
-        expect(res.body.sellers).to.have.lengthOf(1);
-      });
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res).to.have.status(200);
+    expect(res.body.sellers).to.have.lengthOf(1);
   });
 });
 
@@ -115,17 +114,12 @@ describe("POST /auth/sellers", () => {
     token = createToken(userData);
   });
 
-  afterAll(async () => {
-    return mongoose.disconnect();
-  });
-
   it("should return 200", async () => {
-    return request(app)
+    const res = await request(app)
       .get("/auth/sellers")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200)
-      .then((res) => {
-        expect(res.body.ok).to.equal(true);
-      });
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res).to.have.status(200);
+    expect(res.body.ok).to.equal(true);
   });
 });
