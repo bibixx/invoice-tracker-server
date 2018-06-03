@@ -39,7 +39,7 @@ afterAll(async () => {
   return mongoose.disconnect();
 });
 
-describe("GET /auth/sellers", () => {
+describe("GET /sellers", () => {
   beforeAll(async () => {
     const user: IUserModel = new User({
       local: {
@@ -81,18 +81,26 @@ describe("GET /auth/sellers", () => {
     await Promise.all(sellerMock.map(s => s.save()));
   });
 
+  it("should return 401 if token not present", async () => {
+    const res = await request(app)
+      .get("/sellers");
+
+    expect(res).to.have.status(401);
+    expect(res.body.errors[0].msg).to.equal("No auth token");
+  });
+
   it("should return 200", async () => {
     const res = await request(app)
-      .get("/auth/sellers")
+      .get("/sellers")
       .set("Authorization", `Bearer ${token}`);
 
     expect(res).to.have.status(200);
-    expect(res.body.ok).to.equal(true);
+    expect(res.body.ok).to.be.true;
   });
 
   it("should return all sellers for current user", async () => {
     const res = await request(app)
-      .get("/auth/sellers")
+      .get("/sellers")
       .set("Authorization", `Bearer ${token}`);
 
     expect(res).to.have.status(200);
@@ -100,7 +108,7 @@ describe("GET /auth/sellers", () => {
   });
 });
 
-describe("POST /auth/sellers", () => {
+describe("POST /sellers", () => {
   beforeAll(async () => {
     const user: IUserModel = new User(<IUserModel>{
       local: {
@@ -113,12 +121,20 @@ describe("POST /auth/sellers", () => {
     token = user.createToken();
   });
 
+  it("should return 401 if token not present", async () => {
+    const res = await request(app)
+      .post("/sellers");
+
+    expect(res).to.have.status(401);
+    expect(res.body.errors[0].msg).to.equal("No auth token");
+  });
+
   it("should return 200", async () => {
     const res = await request(app)
-      .get("/auth/sellers")
+      .get("/sellers")
       .set("Authorization", `Bearer ${token}`);
 
     expect(res).to.have.status(200);
-    expect(res.body.ok).to.equal(true);
+    expect(res.body.ok).to.be.true;
   });
 });

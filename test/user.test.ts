@@ -31,12 +31,12 @@ afterAll(async () => {
   return mongoose.disconnect();
 });
 
-describe("POST /register", () => {
+describe("POST /auth/register", () => {
   it("should return error if email is invalid", async () => {
     const email = createEmail("@a");
 
     const res = await request(app)
-    .post("/register")
+    .post("/auth/register")
       .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
     expect(res).to.have.status(422);
@@ -47,7 +47,7 @@ describe("POST /register", () => {
     const email = createEmail();
 
     const res = await request(app)
-    .post("/register")
+    .post("/auth/register")
       .send(`email=${email}&password=${password}&confirmPassword=${password}-invalid`);
 
     expect(res).to.have.status(422);
@@ -65,7 +65,7 @@ describe("POST /register", () => {
     await u.save();
 
     const res = await request(app)
-      .post("/register")
+      .post("/auth/register")
       .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
     expect(res).to.have.status(422);
@@ -76,7 +76,7 @@ describe("POST /register", () => {
     const email = createEmail();
 
     const res = await request(app)
-      .post("/register")
+      .post("/auth/register")
       .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
     expect(res).to.have.status(422);
@@ -87,7 +87,7 @@ describe("POST /register", () => {
     const email = createEmail();
 
     const res = await request(app)
-      .post("/register")
+      .post("/auth/register")
       .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
     expect(res).to.have.status(200);
@@ -97,18 +97,18 @@ describe("POST /register", () => {
     const email = createEmail();
 
     const res = await request(app)
-      .post("/register")
+      .post("/auth/register")
       .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
     const user: IUserModel = await User.findOne({ "local.email": email });
 
     expect(res).to.have.status(200);
     expect(user.local.email).to.equal(email);
-    expect(await user.comparePasswords(password)).to.equal(true);
+    expect(await user.comparePasswords(password)).to.be.true;
   });
 });
 
-describe("POST /login", () => {
+describe("POST /auth/login", () => {
   beforeAll(async () => {
     const password = "passw0rd";
 
@@ -124,7 +124,7 @@ describe("POST /login", () => {
     const email = loginEmail;
 
     const res = await request(app)
-    .post("/login")
+    .post("/auth/login")
       .send(`email=${email}&password=${password}`);
 
     expect(res).to.have.status(200);
@@ -134,7 +134,7 @@ describe("POST /login", () => {
     const email = createEmail();
 
     const res = await request(app)
-      .post("/login")
+      .post("/auth/login")
       .send(`email=${email}&password=${password}`);
 
     expect(res).to.have.status(422);
@@ -145,7 +145,7 @@ describe("POST /login", () => {
     const email = loginEmail;
 
     const res = await request(app)
-      .post("/login")
+      .post("/auth/login")
       .send(`email=${email}&password=${password}-invalid`);
 
     expect(res).to.have.status(422);
@@ -156,7 +156,7 @@ describe("POST /login", () => {
     const email = loginEmail;
 
     const res = await request(app)
-      .post("/login")
+      .post("/auth/login")
       .send(`email=${email}&password=${password}`);
 
     let token;

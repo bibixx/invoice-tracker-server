@@ -90,7 +90,5 @@ export const login = [
         return res.json({ token, ok: true });
       });
     })(req, res);
-
-    // return res.json({ token, ok: true });
   },
 ];
