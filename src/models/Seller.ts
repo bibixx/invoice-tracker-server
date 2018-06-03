@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+import { Schema, Document, Model, model } from "mongoose";
 import { ISeller } from "../interfaces/Seller";
 
-export interface ISellerModel extends ISeller, mongoose.Document {}
+export interface ISellerModel extends ISeller, Document {}
 
-const sellerSchema = new mongoose.Schema({
+const sellerSchema: Schema = new Schema({
   owner: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
@@ -39,5 +39,5 @@ const sellerSchema = new mongoose.Schema({
   },
 });
 
-const Seller = mongoose.model<ISellerModel>("Seller", sellerSchema);
+const Seller: Model<ISellerModel> = model<ISellerModel>("Seller", sellerSchema);
 export default Seller;
