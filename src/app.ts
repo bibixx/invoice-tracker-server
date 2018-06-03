@@ -15,6 +15,8 @@ import * as apiController from "./controllers/api";
 import * as userController from "./controllers/user";
 import * as recordsController from "./controllers/records";
 import * as sellersController from "./controllers/sellers";
+import "./auth/passport";
+import passport from "passport";
 
 // Load environment variables from .env file, where API keys and passwords are configured
 dotenv.config({ path: ".env.example" });
@@ -28,10 +30,8 @@ const app = express();
 
 const MONGODB_URI_TEST = "mongodb://localhost:27017/invoice-test";
 
-// mongoose.connect(MONGODB_URI).then(
-mongoose.connect(MONGODB_URI_TEST).then(
-  () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
-).catch((err) => {
+mongoose.connect(MONGODB_URI_TEST)
+.catch((err) => {
   console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
 });
 
@@ -47,7 +47,7 @@ app.use(lusca.xssProtection(true));
 
 app.get("/ping", apiController.getPing);
 
-app.use("/auth/*", jwt({ secret: JWT_SECRET }));
+app.use("/auth/*", passport.authenticate("jwt", { session: false }));
 
 app.post("/register", ...userController.register);
 app.post("/login", ...userController.login);

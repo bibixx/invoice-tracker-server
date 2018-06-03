@@ -9,6 +9,5 @@ describe("GET /ping", () => {
   it("should return 200 OK", async () => {
     const res = await request(app).get("/ping");
     expect(res).to.have.status(200);
-    // expect(true).to.be.false;
   });
 });

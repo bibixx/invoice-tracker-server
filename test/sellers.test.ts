@@ -7,9 +7,7 @@ import app from "../src/app";
 
 import User, { IUserModel } from "../src/models/User";
 import Seller, { ISellerModel } from "../src/models/Seller";
-import { IUserWithoutPassword } from "../src/interfaces/User";
 
-import { createToken } from "../src/util/createToken";
 import { MONGODB_URI } from "../src/util/secrets";
 
 import mongoose, { mongo } from "mongoose";
@@ -31,7 +29,7 @@ beforeAll(async () => {
     await mongoose.connect(MONGODB_URI);
     await mongoose.connection.db.dropDatabase();
 
-    await mongoose.connection.db.createIndex("users", { email: 1 }, { unique: true });
+    await mongoose.connection.db.createIndex("users", { "local.email": 1 }, { unique: true });
   } catch (err) {
     console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
   }
@@ -43,15 +41,18 @@ afterAll(async () => {
 
 describe("GET /auth/sellers", () => {
   beforeAll(async () => {
-    const user: IUserModel = new User({ password, email: sellerEmail1 });
-    const user2: IUserModel = new User({ password, email: sellerEmail2 });
+    const user: IUserModel = new User({
+      local: {
+        password, email: sellerEmail1,
+      },
+    });
+    const user2: IUserModel = new User({
+      local: {
+        password, email: sellerEmail2,
+      },
+    });
 
-    const userData: IUserWithoutPassword = {
-      _id: user._id,
-      email: user.email,
-    };
-
-    token = createToken(userData);
+    token = user.createToken();
 
     sellerMock = [
       new Seller({
@@ -101,16 +102,15 @@ describe("GET /auth/sellers", () => {
 
 describe("POST /auth/sellers", () => {
   beforeAll(async () => {
-    const user: IUserModel = new User({ email: createEmail(), password: "passw0rd" });
+    const user: IUserModel = new User(<IUserModel>{
+      local: {
+        email: createEmail(), password: "passw0rd",
+      },
+    });
 
     await user.save();
 
-    const userData: IUserWithoutPassword = {
-      _id: user._id,
-      email: user.email,
-    };
-
-    token = createToken(userData);
+    token = user.createToken();
   });
 
   it("should return 200", async () => {

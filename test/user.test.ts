@@ -21,7 +21,7 @@ beforeAll(async () => {
   try {
     await mongoose.connect(MONGODB_URI);
     await mongoose.connection.db.dropDatabase();
-    await mongoose.connection.db.createIndex("users", { email: 1 }, { unique: true });
+    await mongoose.connection.db.createIndex("users", { "local.email": 1 }, { unique: true });
   } catch (err) {
     console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
   }
@@ -57,7 +57,11 @@ describe("POST /register", () => {
   it("should return 422 if user with specified email was already registered", async () => {
     const email = createEmail();
 
-    const u = new User({ email, password });
+    const u = new User({
+      local: {
+        email, password,
+      },
+    });
     await u.save();
 
     const res = await request(app)
@@ -96,10 +100,10 @@ describe("POST /register", () => {
       .post("/register")
       .send(`email=${email}&password=${password}&confirmPassword=${password}`);
 
-    const user: IUserModel = await User.findOne({ email });
+    const user: IUserModel = await User.findOne({ "local.email": email });
 
     expect(res).to.have.status(200);
-    expect(user.email).to.equal(email);
+    expect(user.local.email).to.equal(email);
     expect(await user.comparePasswords(password)).to.equal(true);
   });
 });
@@ -108,7 +112,11 @@ describe("POST /login", () => {
   beforeAll(async () => {
     const password = "passw0rd";
 
-    const user = new User({ password, email: loginEmail });
+    const user: IUserModel = new User({
+      local: {
+        password, email: loginEmail,
+      },
+    });
     await user.save();
   });
 
@@ -130,7 +138,7 @@ describe("POST /login", () => {
       .send(`email=${email}&password=${password}`);
 
     expect(res).to.have.status(422);
-    expect(res.body.errors[0].msg).to.equal("User doesn't exist");
+    expect(res.body.errors[0].msg).to.equal("Wrong email or password");
   });
 
   it("should return error if password is invalid", async () => {
@@ -141,7 +149,7 @@ describe("POST /login", () => {
       .send(`email=${email}&password=${password}-invalid`);
 
     expect(res).to.have.status(422);
-    expect(res.body.errors[0].msg).to.equal("Wrong password");
+    expect(res.body.errors[0].msg).to.equal("Wrong email or password");
   });
 
   it("should return jwt of user", async () => {

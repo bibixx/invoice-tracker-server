@@ -21,15 +21,6 @@ export const getSellers = async (req: Request, res: Response, next: NextFunction
 };
 
 const cEmail: any = check("email");
-
-// name: "A",
-// nip: "000000",
-// city: "Warszawa",
-// street: "Pisarka",
-// zip: "03-984",
-// seller: true,
-// place: true,
-
 export const postSellers = [
   [
     cEmail

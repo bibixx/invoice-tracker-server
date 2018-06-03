@@ -1,24 +1,30 @@
-import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+import { Document, Schema, Model, model, Error } from "mongoose";
 import bcrypt from "bcrypt-nodejs";
-import { BCRYPT_ROUNDS } from "../constants/bcrypt";
+import { BCRYPT_ROUNDS, JWT_SECRET } from "../util/secrets";
 import { IUser } from "../interfaces/User";
+import { IUserModel } from "./User";
 
-export interface IUserModel extends IUser, mongoose.Document {
+export interface IUserModel extends IUser, Document {
   comparePasswords: comparePasswordsFunction;
+  createToken: createToken;
 }
 
-const userSchema = new mongoose.Schema({
-  email: { type: String, unique: true },
-  password: String,
+const userSchema: Schema = new Schema({
+  local: {
+    email: { type: String, unique: true },
+    password: String,
+  },
 });
 
 export type comparePasswordsFunction = (passwordToCheck: string) => Promise<{}>;
+export type createToken = () => string;
 
 const comparePasswords: comparePasswordsFunction = async function (passwordToCheck) {
   const user = this;
 
   return new Promise((resolve, reject) => {
-    bcrypt.compare(passwordToCheck, user.password, (err, res) => {
+    bcrypt.compare(passwordToCheck, user.local.password, (err, res) => {
       if (err) {
         return reject(err);
       }
@@ -28,21 +34,33 @@ const comparePasswords: comparePasswordsFunction = async function (passwordToChe
   });
 };
 
+const createToken: createToken = function () {
+  const user = this;
+  const userData = {
+    _id: user._id,
+    email: user.local.email,
+  };
+
+  return jwt.sign(userData, JWT_SECRET);
+};
+
 userSchema.methods.comparePasswords = comparePasswords;
 
-userSchema.pre("save", async function save(next: Function) {
-  const user = this;
+userSchema.methods.createToken = createToken;
 
-  if (!user.isModified("password")) { return next(); }
+userSchema.pre("save", async function save(next: Function) {
+  const user: IUserModel = <IUserModel>this;
+
+  if (!user.isModified("local.password")) { return next(); }
   bcrypt.genSalt(10, (err, salt) => {
     if (err) { return next(err); }
-    const hash = bcrypt.hash(user.password, salt, undefined, (err: mongoose.Error, hash) => {
+    const hash = bcrypt.hash(user.local.password, salt, undefined, (err: Error, hash) => {
       if (err) { return next(err); }
-      user.password = hash;
+      user.local.password = hash;
       next();
     });
   });
 });
 
-const User = mongoose.model<IUserModel>("User", userSchema);
+const User: Model<IUserModel> = model<IUserModel>("User", userSchema);
 export default User;

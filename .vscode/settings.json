@@ -9,5 +9,6 @@
     "typescript.referencesCodeLens.enabled": true,
     "tslint.ignoreDefinitionFiles": false,
     "tslint.autoFixOnSave": true,
-    "tslint.exclude": "**/node_modules/**/*"
+    "tslint.exclude": "**/node_modules/**/*",
+    "jest.pathToJest": "yarn test:vscode",
 }

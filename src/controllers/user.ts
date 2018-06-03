@@ -1,12 +1,10 @@
 import { Request, Response, NextFunction } from "express";
+import passport from "passport";
 
 import { sanitizeBody } from "express-validator/filter";
 import { check, validationResult } from "express-validator/check";
 
 import User, { IUserModel } from "../models/User";
-import { IUserWithoutPassword } from "../interfaces/User";
-
-import { createToken } from "../util/createToken";
 
 const cEmail: any = check("email");
 const cPassword: any = check("password");
@@ -42,8 +40,10 @@ export const register = [
     }
 
     const user = new User({
-      password: req.body.password,
-      email: req.body.email,
+      local: {
+        password: req.body.password,
+        email: req.body.email,
+      },
     });
 
     try {
@@ -79,25 +79,18 @@ export const login = [
       .withMessage("must be at least 5 chars long"),
   ],
   async (req: Request, res: Response, next: NextFunction) => {
-    const user: IUserModel = await User.findOne({ email: req.body.email });
+    passport.authenticate("local", { session: false }, (err, user, info) => {
+      if (err || !user) {
+        return next({ errors: [{ msg: "Wrong email or password" }], status: 422 });
+      }
 
-    if (!user) {
-      return next({ errors: [{ msg: "User doesn't exist" }], status: 422 });
-    }
+      req.login(user, { session: false }, (err) => {
+        const token: string = user.createToken();
 
-    const doPasswordsMatch = await user.comparePasswords(req.body.password);
+        return res.json({ token, ok: true });
+      });
+    })(req, res);
 
-    if (!doPasswordsMatch) {
-      return next({ errors: [{ msg: "Wrong password" }], status: 422 });
-    }
-
-    const userData: IUserWithoutPassword = {
-      _id: user._id,
-      email: user.email,
-    };
-
-    const token: string = createToken(userData);
-
-    return res.json({ token, ok: true });
+    // return res.json({ token, ok: true });
   },
 ];

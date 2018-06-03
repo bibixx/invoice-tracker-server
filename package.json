@@ -15,7 +15,8 @@
     "watch-node": "nodemon dist/server.js",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
     "test": "jest --verbose --coverage",
-    "watch-test": "npm run test -- --watchAll",
+    "test:vscode": "jest",
+    "watch-test": "npm run test -- --watch",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
     "build-sass": "node-sass src/public/css/main.scss dist/public/css/main.css",
@@ -27,6 +28,7 @@
     "watch-debug": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run serve-debug\""
   },
   "dependencies": {
+    "@types/passport-jwt": "^3.0.1",
     "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.18.2",
     "chai-http": "^4.0.0",
@@ -41,6 +43,9 @@
     "jsonwebtoken": "^8.2.1",
     "lusca": "^1.5.2",
     "mongoose": "^5.1.3",
+    "passport": "^0.4.0",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
     "pug": "^2.0.0-rc.4",
     "tslint-config-airbnb": "^5.9.2",
     "winston": "^2.4.0"

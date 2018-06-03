@@ -14,6 +14,7 @@ const prod = ENVIRONMENT === "production";
 const test = ENVIRONMENT === "test";
 
 export const JWT_SECRET = process.env["JWT_SECRET"];
+export const BCRYPT_ROUNDS = process.env.BCRYPT_ROUNDS;
 
 export const MONGODB_URI = prod ?
   process.env["MONGODB_URI"] :

@@ -1,8 +1,7 @@
-export interface IUserWithoutPassword {
+export interface IUser {
   _id: any;
-  email: String;
-}
-
-export interface IUser extends IUserWithoutPassword {
-  password: String;
+  local: {
+    password: string;
+    email: string;
+  };
 }
