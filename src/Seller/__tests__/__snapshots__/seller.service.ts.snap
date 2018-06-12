@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SellerService.getSellerById should throw error if sellerId is invalid 1`] = `"sellerId must be a valid ObjectId"`;
+
+exports[`SellerService.getSellerById should throw error if userId is invalid 1`] = `"userId must be a valid ObjectId"`;
+
+exports[`SellerService.getSellers should throw error if userId is invalid 1`] = `"userId must be a valid ObjectId"`;

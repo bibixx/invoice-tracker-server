@@ -1,7 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import passport from "passport";
 
-import UserService from "../User/";
+import UserService from "./index";
+
+/**
+ * POST /register
+ * Register using email and password.
+ */
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {

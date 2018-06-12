@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import { Document, Schema, Model, model, Error } from "mongoose";
 import { JWT_SECRET, BCRYPT_ROUNDS } from "../util/secrets";
-import { IUser } from "../interfaces/User";
+import { IUser } from "./user.interface";
 import { IUserModel } from "./user.model";
 import { genHash, genSalt, compare } from "../util/bcrypt";
-import bcrypt from "bcrypt-nodejs";
 
 export interface IUserModel extends IUser, Document {
   comparePasswords: comparePasswordsFunction;

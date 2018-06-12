@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { Request, Response, NextFunction } from "express";
 import { validationResult, checkSchema } from "express-validator/check";
 
-import Seller from "../models/Seller";
+import Seller from "../Seller/seller.model";
 import User from "../User/user.model";
 import { isNip } from "../util/isNip";
 
@@ -81,26 +81,6 @@ const deleteSchema = {
       errorMessage: "Specified id is not a valid id",
     },
   },
-};
-
-/**
- * GET /sellers/:id
- * Get all sellers
- */
-export const getSellers = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const sellers = await Seller.find(
-      {
-        owner: {
-          $in: [req.user._id],
-        },
-      },
-    );
-
-    res.json({ sellers, ok: true });
-  } catch (e) {
-    next({ errors: [{ msg: e }] });
-  }
 };
 
 /**

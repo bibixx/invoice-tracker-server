@@ -17,7 +17,7 @@ passport.use(
     } catch (err) {
       return cb(null, false, { message: err.message });
     }
-  } )
+  }),
 );
 
 passport.use(new JWTStrategy({

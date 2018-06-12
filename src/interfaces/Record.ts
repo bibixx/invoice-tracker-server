@@ -1,4 +1,4 @@
-import { ISellerModel } from "../models/Seller";
+import { ISellerModel } from "../Seller/seller.model";
 
 export interface IRecord {
   productName: string;

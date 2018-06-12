@@ -6,27 +6,31 @@ export const genSalt = (): Promise<string> => new Promise((resolve, reject) => {
     if (err) {
       return reject(err);
     }
-    
+
     return resolve(salt);
-  })
-});
-
-export const genHash = (password: string, salt: string): Promise<string> => new Promise((resolve, reject) => {
-  bcrypt.hash(password, salt, undefined, (err: Error, hash) => {
-    if (err) {
-      return reject(err);
-    }
-    
-    return resolve(hash);
-  })
-});
-
-export const compare = (password1: string, password2: string): Promise<boolean> => new Promise((resolve, reject) => {
-  bcrypt.compare(password1, password2, (err, res) => {
-    if (err) {
-      return reject(err);
-    }
-
-    return resolve(res);
   });
 });
+
+export const genHash =
+  (password: string, salt: string): Promise<string> =>
+    new Promise((resolve, reject) => {
+      bcrypt.hash(password, salt, undefined, (err: Error, hash) => {
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve(hash);
+      });
+    });
+
+export const compare =
+  (password1: string, password2: string): Promise<boolean> =>
+    new Promise((resolve, reject) => {
+      bcrypt.compare(password1, password2, (err, res) => {
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve(res);
+      });
+    });

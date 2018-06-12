@@ -1,5 +1,5 @@
 import { Schema, Document, Model, model } from "mongoose";
-import { ISeller } from "../interfaces/Seller";
+import { ISeller } from "../Seller/seller.interface";
 
 export interface IRecordModel extends ISeller, Document {}
 

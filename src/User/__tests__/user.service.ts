@@ -53,7 +53,8 @@ describe("UserService.createUser", () => {
 
     const US = UserService(User);
 
-    await expect(US.createUser("a@a.pl", password, password)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(US.createUser("a@a.pl", password, password))
+      .rejects.toThrowErrorMatchingSnapshot();
     expect(sinon.assert.notCalled(User.create));
   });
 
@@ -64,16 +65,27 @@ describe("UserService.createUser", () => {
     const US = UserService(User);
 
     /* cSpell:disable */
-    await expect(US.createUser("a@a.pl", "ą", "ą")).rejects.toThrowErrorMatchingSnapshot();
-    await expect(US.createUser("a@a.pl", "ąbcdefgh", "ąbcdefgh")).rejects.toThrowErrorMatchingSnapshot();
-    await expect(US.createUser("a@a.pl", "Ąbcdefgh", "Ąbcdefgh")).rejects.toThrowErrorMatchingSnapshot();
-    await expect(US.createUser("a@a.pl", "Ąbcdefgh1", "Ąbcdefgh1")).resolves.not.toThrow();
+    await expect(
+      US.createUser("a@a.pl", "ą", "ą"),
+    ).rejects.toThrowErrorMatchingSnapshot();
+
+    await expect(
+      US.createUser("a@a.pl", "ąbcdefgh", "ąbcdefgh"),
+    ).rejects.toThrowErrorMatchingSnapshot();
+
+    await expect(
+      US.createUser("a@a.pl", "Ąbcdefgh", "Ąbcdefgh"),
+    ).rejects.toThrowErrorMatchingSnapshot();
+
+    await expect(
+      US.createUser("a@a.pl", "Ąbcdefgh1", "Ąbcdefgh1"),
+    ).resolves.not.toThrow();
+
     /* cSpell:enable */
 
     expect(sinon.assert.calledOnce(User.create));
   });
 });
-
 
 describe("UserService.login", () => {
   beforeEach(() => {
@@ -94,7 +106,7 @@ describe("UserService.login", () => {
 
   it("should return error if password is invalid", async () => {
     User.findOne.resolves({
-      comparePasswords: () => Promise.resolve(false)
+      comparePasswords: () => Promise.resolve(false),
     });
 
     const US = UserService(User);
@@ -105,7 +117,7 @@ describe("UserService.login", () => {
   it("should successfully login", async () => {
     User.findOne.resolves({
       email: true,
-      comparePasswords: () => Promise.resolve(true)
+      comparePasswords: () => Promise.resolve(true),
     });
 
     const US = UserService(User);
@@ -115,7 +127,7 @@ describe("UserService.login", () => {
 
   it("should throw error if password doesn't match requirements", async () => {
     User.findOne.resolves({
-      comparePasswords: () => Promise.resolve(true)
+      comparePasswords: () => Promise.resolve(true),
     });
 
     const US = UserService(User);

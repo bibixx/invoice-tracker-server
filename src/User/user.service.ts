@@ -3,7 +3,7 @@ import { Model } from "mongoose";
 import { IUserModel } from "./user.model";
 import { uppercaseUnicodeRegex } from "../util/uppercaseUnicodeRegex";
 
-const createUser = (User: Model<IUserModel>) =>
+const createUser = User =>
   (email: string, password: string, passwordConfirm: string) =>
     new Promise(async (resolve, reject) => {
       const schema = yup.object().shape({
@@ -13,18 +13,18 @@ const createUser = (User: Model<IUserModel>) =>
           .test(
             "password must contain uppercase letter",
             "password must contain uppercase letter",
-            val => uppercaseUnicodeRegex.test(val)
+            val => uppercaseUnicodeRegex.test(val),
           )
           .test(
             "password must contain a number",
             "password must contain a number",
-            val => /[0-1]/.test(val)
+            val => /[0-1]/.test(val),
           ),
         passwordConfirm: yup.string().required()
-          .test("passwords match", "passwords must match", function(val) {
+          .test("passwords match", "passwords must match", function (val) {
             return val === this.parent.password;
           }),
-        });
+      });
 
       try {
         await schema.validate({
@@ -50,7 +50,7 @@ const createUser = (User: Model<IUserModel>) =>
       return resolve();
     });
 
-const login = (User: Model<IUserModel>) => 
+const login = User =>
   (email: string, password: string) =>
       new Promise(async (resolve, reject) => {
         const schema = yup.object().shape({
@@ -60,15 +60,15 @@ const login = (User: Model<IUserModel>) =>
             .test(
               "password must contain uppercase letter",
               "password must contain uppercase letter",
-              val => uppercaseUnicodeRegex.test(val)
+              val => uppercaseUnicodeRegex.test(val),
             )
             .test(
               "password must contain a number",
               "password must contain a number",
-              val => /[0-1]/.test(val)
+              val => /[0-1]/.test(val),
             ),
-          });
-  
+        });
+
         try {
           await schema.validate({
             email,
@@ -79,20 +79,19 @@ const login = (User: Model<IUserModel>) =>
         }
 
         const user: IUserModel = await User.findOne({ "local.email": email });
-        
+
         if (!user) {
           return reject(new Error("incorrect email or password."));
         }
-        
+
         const doPasswordsMatch = await user.comparePasswords(password);
-        
+
         if (!doPasswordsMatch) {
           return reject(new Error("incorrect email or password."));
         }
 
         return resolve(user);
       });
-
 
 export default (User: Model<IUserModel>) => ({
   createUser: createUser(User),
