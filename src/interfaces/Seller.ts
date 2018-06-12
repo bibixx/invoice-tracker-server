@@ -1,4 +1,4 @@
-import { IUserModel } from "../models/User";
+import { IUserModel } from "../User/user.model";
 
 export interface ISeller {
   owner: IUserModel;

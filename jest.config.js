@@ -12,7 +12,8 @@ module.exports = {
 		'^.+\\.(ts|tsx)$': './node_modules/ts-jest/preprocessor.js'
 	},
 	testMatch: [
-		'**/test/**/*.test.(ts|js)'
+		// '**/test/**/*.test.(ts|js)',
+		'**/__tests__/*.(ts|js)'
 	],
 	testEnvironment: 'node'
 };

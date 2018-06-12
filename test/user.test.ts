@@ -9,7 +9,7 @@ import { MONGODB_URI } from "../src/util/secrets";
 
 import { createEmail } from "./utils/createEmail";
 
-import User, { IUserModel } from "../src/models/User";
+import User, { IUserModel } from "../src/User/user.model";
 import app from "../src/app";
 
 const loginEmail = createEmail();
@@ -36,10 +36,10 @@ describe("POST /auth/register", () => {
 
     const res = await request(app)
       .post("/auth/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
+      .send(`email=${email}&password=${password}&passwordConfirm=${password}`);
 
     expect(res).to.have.status(422);
-    expect(res.body.errors[0].msg).to.equal("Email invalid");
+    expect(res.body.errors[0]).to.equal("email must be a valid email");
   });
 
   it("should return error if passwords don't match", async () => {
@@ -47,10 +47,10 @@ describe("POST /auth/register", () => {
 
     const res = await request(app)
     .post("/auth/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}-invalid`);
+      .send(`email=${email}&password=${password}&passwordConfirm=${password}-invalid`);
 
     expect(res).to.have.status(422);
-    expect(res.body.errors[0].msg).to.equal("Passwords must match");
+    expect(res.body.errors[0]).to.equal("passwords must match");
   });
 
   it("should return 422 if user with specified email was already registered", async () => {
@@ -65,10 +65,10 @@ describe("POST /auth/register", () => {
 
     const res = await request(app)
       .post("/auth/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
+      .send(`email=${email}&password=${password}&passwordConfirm=${password}`);
 
     expect(res).to.have.status(422);
-    expect(res.body.errors[0].msg).to.equal("This email is already in use");
+    expect(res.body.errors[0]).to.equal(`user with email ${email} was already created`);
   });
 
   it.skip("should return 422 if password doesn't match password requirements", async () => {
@@ -76,10 +76,10 @@ describe("POST /auth/register", () => {
 
     const res = await request(app)
       .post("/auth/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
+      .send(`email=${email}&password=${password}&passwordConfirm=${password}`);
 
     expect(res).to.have.status(422);
-    expect(res.body.errors[0].msg).to.equal("Passwords must match");
+    expect(res.body.errors[0]).to.equal("Passwords must match");
   });
 
   it("should return 200", async () => {
@@ -87,7 +87,7 @@ describe("POST /auth/register", () => {
 
     const res = await request(app)
       .post("/auth/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
+      .send(`email=${email}&password=${password}&passwordConfirm=${password}`);
 
     expect(res).to.have.status(200);
   });
@@ -97,7 +97,7 @@ describe("POST /auth/register", () => {
 
     const res = await request(app)
       .post("/auth/register")
-      .send(`email=${email}&password=${password}&confirmPassword=${password}`);
+      .send(`email=${email}&password=${password}&passwordConfirm=${password}`);
 
     const user: IUserModel = await User.findOne({ "local.email": email });
 

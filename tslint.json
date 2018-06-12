@@ -5,7 +5,8 @@
         "import-name": false,
         "no-this-assignment": false,
         "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"],
-        "align": false
+        "align": false,
+        "no-any": false,
         // "class-name": true,
         // "comment-format": [
         //     true,

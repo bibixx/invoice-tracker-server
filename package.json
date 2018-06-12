@@ -14,7 +14,7 @@
     "serve": "node dist/server.js",
     "watch-node": "nodemon dist/server.js",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
-    "test": "jest --verbose --coverage",
+    "test": "jest",
     "test:log": "jest",
     "test:watch": "npm run test -- --watch",
     "build-ts": "tsc",
@@ -26,6 +26,8 @@
     "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\""
   },
   "dependencies": {
+    "@types/sinon": "^5.0.1",
+    "@types/yup": "^0.24.6",
     "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.18.2",
     "compression": "^1.7.1",
@@ -43,8 +45,10 @@
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "pug": "^2.0.0-rc.4",
+    "sinon": "^6.0.0",
     "tslint-config-airbnb": "^5.9.2",
-    "winston": "^2.4.0"
+    "winston": "^2.4.0",
+    "yup": "^0.25.1"
   },
   "devDependencies": {
     "@types/bcrypt-nodejs": "^0.0.30",

@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
 import { Document, Schema, Model, model, Error } from "mongoose";
-import bcrypt from "bcrypt-nodejs";
-import { BCRYPT_ROUNDS, JWT_SECRET } from "../util/secrets";
+import { JWT_SECRET, BCRYPT_ROUNDS } from "../util/secrets";
 import { IUser } from "../interfaces/User";
-import { IUserModel } from "./User";
+import { IUserModel } from "./user.model";
+import { genHash, genSalt, compare } from "../util/bcrypt";
+import bcrypt from "bcrypt-nodejs";
 
 export interface IUserModel extends IUser, Document {
   comparePasswords: comparePasswordsFunction;
@@ -23,15 +24,7 @@ export type createToken = () => string;
 const comparePasswords: comparePasswordsFunction = async function (passwordToCheck) {
   const user = this;
 
-  return new Promise((resolve, reject) => {
-    bcrypt.compare(passwordToCheck, user.local.password, (err, res) => {
-      if (err) {
-        return reject(err);
-      }
-
-      return resolve(res);
-    });
-  });
+  return compare(passwordToCheck, user.local.password);
 };
 
 const createToken: createToken = function () {
@@ -51,15 +44,18 @@ userSchema.methods.createToken = createToken;
 userSchema.pre("save", async function save(next: Function) {
   const user: IUserModel = <IUserModel>this;
 
-  if (!user.isModified("local.password")) { return next(); }
-  bcrypt.genSalt(10, (err, salt) => {
-    if (err) { return next(err); }
-    const hash = bcrypt.hash(user.local.password, salt, undefined, (err: Error, hash) => {
-      if (err) { return next(err); }
-      user.local.password = hash;
-      next();
-    });
-  });
+  if (!user.isModified("local.password")) {
+    return next();
+  }
+
+  try {
+    const salt = await genSalt();
+    const hash = await genHash(user.local.password, salt);
+    user.local.password = hash;
+    return next();
+  } catch (e) {
+    return next(e);
+  }
 });
 
 const User: Model<IUserModel> = model<IUserModel>("User", userSchema);

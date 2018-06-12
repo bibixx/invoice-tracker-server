@@ -1,14 +1,11 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import compression from "compression";  // compresses requests
 import bodyParser from "body-parser";
-import path from "path";
-import jwt from "express-jwt";
 import lusca from "lusca";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
-import { MONGODB_URI, JWT_SECRET } from "./util/secrets";
-import logger from "./util/logger";
+import { MONGODB_URI } from "./util/secrets";
 import handleError from "./routes/error";
 import routes from "./routes";
 import "./auth/passport";
@@ -18,8 +15,7 @@ dotenv.config({ path: ".env" });
 const app = express();
 
 (<any>mongoose).Promise = global.Promise;
-const MONGODB_URI_TEST = "mongodb://localhost:27017/invoice-test";
-mongoose.connect(MONGODB_URI_TEST)
+mongoose.connect(MONGODB_URI)
 .catch((err) => {
   console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
 });

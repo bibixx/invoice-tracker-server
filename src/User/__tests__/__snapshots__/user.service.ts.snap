@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UserService.createUser should throw error if email is invalid 1`] = `"email must be a valid email"`;
+
+exports[`UserService.createUser should throw error if password doesn't match requirements 1`] = `"password must be at least 8 characters"`;
+
+exports[`UserService.createUser should throw error if password doesn't match requirements 2`] = `"password must contain uppercase letter"`;
+
+exports[`UserService.createUser should throw error if password doesn't match requirements 3`] = `"password must contain a number"`;
+
+exports[`UserService.createUser should throw error if passwords don't match 1`] = `"passwords must match"`;
+
+exports[`UserService.createUser should throw error if user was previously signed up 1`] = `"user with email a@a.pl was already created"`;
+
+exports[`UserService.login should return error if password is invalid 1`] = `"incorrect email or password."`;
+
+exports[`UserService.login should throw error if password doesn't match requirements 1`] = `"password must be at least 8 characters"`;
+
+exports[`UserService.login should throw error if password doesn't match requirements 2`] = `"password must contain uppercase letter"`;
+
+exports[`UserService.login should throw error if password doesn't match requirements 3`] = `"password must contain a number"`;
+
+exports[`UserService.login should throw error if user doesn't exist 1`] = `"incorrect email or password."`;

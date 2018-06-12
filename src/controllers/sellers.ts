@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { validationResult, checkSchema } from "express-validator/check";
 
 import Seller from "../models/Seller";
-import User from "../models/User";
+import User from "../User/user.model";
 import { isNip } from "../util/isNip";
 
 const postSchema = {
