@@ -1,30 +1,15 @@
-import pg from 'pg';
-const { Pool } = pg;
+import knex from './knex';
 
 (async () => {
-  const pool = new Pool({
-    user: 'postgres',
-    host: 'postgres',
-    // database: 'mydb',
-    password: process.env.POSTGRES_PASSWORD,
+  await knex('sellersAndPlaces').insert({
+    name: "Media Saturn Online Sp. z o.o.",
+    city: "Warszawa",
+    streetAddress: 'Al. Jerozolimskie 179',
+    nip: '1132470708',
+    zipCode: "02-222",
+    isPlaceOfPurchase: true,
+    isSeller: true,
   });
 
-  console.log("0");
-  await new Promise(res => setTimeout(res, 1000));
-  console.log("1");
-  await new Promise(res => setTimeout(res, 2000));
-  console.log("2");
-  await new Promise(res => setTimeout(res, 3000));
-  console.log("3");
-  await new Promise(res => setTimeout(res, 4000));
-  console.log("4");
-  await new Promise(res => setTimeout(res, 5000));
-  console.log("5");
-  await new Promise(res => setTimeout(res, 6000));
-  console.log("6");
-  
-  pool.query('SELECT NOW()', (err, res) => {
-    console.log(err, res)
-    pool.end()
-  });
+  console.log(await knex.select('name', 'streetAddress').from('sellersAndPlaces'));
 })();

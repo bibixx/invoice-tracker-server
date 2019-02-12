@@ -7,12 +7,18 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "node --experimental-modules ./src/index.mjs",
-    "dev": "nodemon -x \"node --experimental-modules\" ./src/index.mjs"
+    "serve": "node --experimental-modules ./src/index.mjs",
+    "dev": "nodemon -x \"node --experimental-modules\" ./src/index.mjs",
+    "migrate": "node-pg-migrate",
+    "start:prod": "./bin/migrate.js && yarn serve",
+    "start:dev": "./bin/migrate.js && yarn dev"
   },
   "dependencies": {
     "express": "^4.16.4",
+    "knex": "^0.16.3",
+    "node-pg-migrate": "^3.16.0",
     "nodemon": "^1.18.10",
-    "pg": "^7.8.0"
+    "pg": "^7.8.0",
+    "pg-promise": "^8.5.5"
   }
 }

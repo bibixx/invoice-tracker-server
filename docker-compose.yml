@@ -8,16 +8,20 @@ services:
     volumes:
       - ./data:/var/lib/postgresql/data
     container_name: postgres
+    env_file:
+      - .env
     networks:
       - backend
-    # expose:
-    #   - "5432"
+    expose:
+      - "5432"
     ports:
       - "5432:5432"
   serve:
     build:
       dockerfile: ./docker/Dockerfile.local
       context: .
+    volumes:
+      - ./src:/app/src
     depends_on:
       - db
     env_file:
