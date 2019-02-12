@@ -1,0 +1,9 @@
+{
+  "name": "invoice-tracker-server",
+  "version": "3.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:bibixx/invoice-tracker-server.git",
+  "author": "Bartosz Legięć <bartosz@legiec.eu>",
+  "license": "MIT",
+  "private": true
+}
