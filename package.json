@@ -5,5 +5,14 @@
   "repository": "git@github.com:bibixx/invoice-tracker-server.git",
   "author": "Bartosz Legięć <bartosz@legiec.eu>",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "scripts": {
+    "start": "node --experimental-modules ./src/index.mjs",
+    "dev": "nodemon -x \"node --experimental-modules\" ./src/index.mjs"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "nodemon": "^1.18.10",
+    "pg": "^7.8.0"
+  }
 }

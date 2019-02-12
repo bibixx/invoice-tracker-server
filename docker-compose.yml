@@ -1,0 +1,28 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    container_name: postgres
+    networks:
+      - backend
+    # expose:
+    #   - "5432"
+    ports:
+      - "5432:5432"
+  serve:
+    build:
+      dockerfile: ./docker/Dockerfile.local
+      context: .
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - backend
+networks: 
+  backend:
