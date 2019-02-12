@@ -9,5 +9,5 @@ export default knex({
     host: POSTGRES_HOST,
     database: POSTGRES_DB,
     password: POSTGRES_PASSWORD,
-  }
+  },
 });
