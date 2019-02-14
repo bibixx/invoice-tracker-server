@@ -14,4 +14,5 @@ COPY migrations migrations
 COPY bin bin
 COPY .babelrc .babelrc
 
+
 CMD ["yarn", "test:dev", "--watch"]

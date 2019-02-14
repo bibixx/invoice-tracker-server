@@ -4,6 +4,8 @@ services:
     container_name: postgres_test
     image: postgres
     restart: always
+
+
     env_file:
       - .env
     networks:

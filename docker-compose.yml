@@ -1,13 +1,11 @@
 version: '3'
 services:
   db:
+    container_name: postgres
     image: postgres
     restart: always
-    env_file:
-      - .env
     volumes:
       - ./data:/var/lib/postgresql/data
-    container_name: postgres
     env_file:
       - .env
     networks:
@@ -21,6 +19,8 @@ services:
     build:
       dockerfile: ./docker/Dockerfile.local
       context: .
+
+    
     volumes:
       - ./src:/app/src
     depends_on:

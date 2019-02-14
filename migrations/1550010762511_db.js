@@ -1,5 +1,5 @@
 exports.up = pgm => {
-  pgm.createTable("sellersAndPlaces", {
+  pgm.createTable("sellers", {
     id: "id",
     name: {
       type: "varchar(256)",
@@ -44,12 +44,12 @@ exports.up = pgm => {
     placeOfPurchase: {
       type: "integer",
       notNull: true,
-      references: '"sellersAndPlaces"(id)',
+      references: '"sellers"(id)',
     },
     seller: {
       type: "integer",
       notNull: true,
-      references: '"sellersAndPlaces"(id)',
+      references: '"sellers"(id)',
     },
     boughtAt: {
       type: "timestamp",
