@@ -1,0 +1,33 @@
+version: '3'
+services:
+  db_test:
+    container_name: postgres_test
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - backend_test
+    expose:
+      - "5432"
+    ports:
+      - "5433:5432"
+  backend_test:
+    container_name: backend_test
+    build:
+      dockerfile: ./docker/Dockerfile.test
+      context: .
+    environment:
+      POSTGRES_HOST: postgres_test
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - db_test
+    env_file:
+      - .env
+    networks:
+      - backend_test
+    stdin_open: true
+    tty: true
+networks: 
+  backend_test:

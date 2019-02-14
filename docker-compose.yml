@@ -16,7 +16,8 @@ services:
       - "5432"
     ports:
       - "5432:5432"
-  serve:
+  backend:
+    container_name: backend
     build:
       dockerfile: ./docker/Dockerfile.local
       context: .
@@ -28,5 +29,7 @@ services:
       - .env
     networks:
       - backend
+    ports:
+      - "3000:3000"
 networks: 
   backend:

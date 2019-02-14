@@ -6,6 +6,7 @@ const { POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_DB } = process.env;
 
 let failsCount = 0;
 
+// eslint-disable-next-line consistent-return
 const run = async () => {
   try {
     await migrate({
@@ -16,11 +17,13 @@ const run = async () => {
     });
   } catch (error) {
     failsCount += 1;
-    console.log(error);
 
+    console.log(`Fail ${failsCount} / 20`);
     if (failsCount < 20) {
-      setTimeout(() => run(), 1000);
+      return setTimeout(() => run(), 1000);
     }
+
+    console.log(error);
   }
 };
 
