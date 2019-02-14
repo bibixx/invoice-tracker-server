@@ -1,6 +1,7 @@
 import request from 'supertest';
 import * as sellersModel from '../models/sellers';
 import { appWithRouter } from '../utils/tests/express';
+import { fakeSellers } from '../utils/tests/fakes/sellers';
 
 import router from './sellers';
 
@@ -17,30 +18,7 @@ const omit = keyToOmit => obj => Object.entries(obj).reduce((prev, [key, value])
   return prev;
 }, {});
 
-describe('/sellers', () => {
-  const fakeSellers = [
-    {
-      id: '0',
-      name: 'Laskowski S.A.',
-      city: 'Koszalin',
-      streetAddress: 'ul. Chopina Fryderyka 149',
-      nip: '1234567890',
-      zipCode: '75-576',
-      isPlaceOfPurchase: true,
-      isSeller: true,
-    },
-    {
-      id: '1',
-      name: 'Lis sp. z o.o.',
-      city: 'Mysłowice',
-      streetAddress: 'ul. Kochanowskiego Jana 75',
-      nip: '0987654321',
-      zipCode: '41-404',
-      isPlaceOfPurchase: true,
-      isSeller: false,
-    },
-  ];
-
+describe.skip('/sellers', () => {
   describe('GET /', () => {
     it('should return all sellers', async () => {
       const getSpy = jest.spyOn(sellersModel, 'getSellers');

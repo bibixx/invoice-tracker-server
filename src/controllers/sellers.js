@@ -2,7 +2,7 @@ import { createSeller, getSellers, getSellerById } from '../models/sellers';
 
 const formatSeller = ({ id, ...sellerAttribures }) => ({
   type: 'seller',
-  ...(id && { id: String(id) }),
+  ...(id && { id: Number(id) }),
   attributes: sellerAttribures,
 });
 
