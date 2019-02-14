@@ -1,14 +1,22 @@
 import knex from '../knex';
 
-export const createSeller = name => knex('sellers')
+export const createSeller = ({
+  name,
+  city,
+  streetAddress,
+  nip,
+  zipCode,
+  isPlaceOfPurchase,
+  isSeller,
+}) => knex('sellers')
   .insert({
     name,
-    city: 'B',
-    streetAddress: 'C',
-    nip: '123456789',
-    zipCode: '00-911',
-    isPlaceOfPurchase: true,
-    isSeller: true,
+    city,
+    streetAddress,
+    nip,
+    zipCode,
+    isPlaceOfPurchase,
+    isSeller,
   });
 
 export const getSellers = () => knex('sellers').select();

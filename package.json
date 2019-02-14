@@ -12,7 +12,7 @@
     "migrate": "node-pg-migrate",
     "start:prod": "./bin/migrate.js && yarn serve",
     "start:dev": "./bin/migrate.js && yarn dev",
-    "test:dev": "./bin/migrate.js && yarn test",
+    "test:dev": "./bin/migrate.js && yarn test --verbose",
     "test": "jest"
   },
   "dependencies": {
