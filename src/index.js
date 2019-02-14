@@ -1,14 +1,14 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 
-import router from './controllers';
+import router from './routes';
 
 const { EXPRESS_PORT, NODE_ENV } = process.env;
 
 const app = express();
 app
   .use(bodyParser.json())
-  .use('/', router);
+  .use(router);
 
 if (NODE_ENV !== 'test') {
   app.listen(EXPRESS_PORT, () => {

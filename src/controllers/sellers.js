@@ -1,20 +1,57 @@
-import express from 'express';
-import { createSeller, getSellers } from '../models/sellers';
+import { createSeller, getSellers, getSellerById } from '../models/sellers';
 
-const router = express.Router();
-
-router.post('/', async (req, res) => {
-  await createSeller(req.body.name);
-
-  res.status(201).send('Added');
+const formatSeller = ({ id, ...sellerAttribures }) => ({
+  type: 'seller',
+  ...(id && { id: String(id) }),
+  attributes: sellerAttribures,
 });
 
-router.get('/', async (req, res) => {
+export const createSellerPost = async (req, res) => {
+  const {
+    data: {
+      attributes: seller,
+      attributes: {
+        name,
+        city,
+        streetAddress,
+        nip,
+        zipCode,
+        isPlaceOfPurchase,
+        isSeller,
+      },
+    },
+  } = req.body;
+
+  await createSeller({
+    name,
+    city,
+    streetAddress,
+    nip,
+    zipCode,
+    isPlaceOfPurchase,
+    isSeller,
+  });
+
+  res.status(201).json({
+    data: formatSeller(seller),
+  });
+};
+
+export const getSellersGet = async (req, res) => {
   const sellers = await getSellers();
 
   res.status(200).json({
-    sellers,
+    data: sellers.map(formatSeller),
   });
-});
+};
 
-export default router;
+export const getSellerByIdGet = async (req, res) => {
+  const id = Number(req.params.id);
+  const seller = await getSellerById(id);
+
+  res.status(200).json({
+    data: [
+      formatSeller(seller),
+    ],
+  });
+};

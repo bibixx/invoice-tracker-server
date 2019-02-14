@@ -20,3 +20,9 @@ export const createSeller = ({
   });
 
 export const getSellers = () => knex('sellers').select();
+
+export const getSellerById = async (id) => {
+  const sellersWithId = await knex.select().where({ id }).table('sellers');
+
+  return sellersWithId[0];
+};
